@@ -43,14 +43,14 @@
 #define OPEN 1 
 #define CLOSE 2
 #define ETAT_CONST 0
+#define DEGREE_WINDOW_POSITION_CLOSE 0
+#define DEGREE_WINDOW_POSITION_OPEN 90
+#define DELAY_VALUE 15
 
 Servo myservo;  // create servo object to control a servo
-// 16 servo objects can be created on the ESP32
-int pos = 0;    // variable to store the servo position
-// Recommended PWM GPIO pins on the ESP32 include 2,4,12-19,21-23,25-27,32-33 
-int i=0;
-int action_window;
-int position_actuel;
+int positionner_servo;    // variable to store the servo position
+int action_window;    // Action à appliquer sur la feneêtre
+int position_actuel; 
 
 
 void setup() {
@@ -67,48 +67,51 @@ void setup() {
   myservo.attach(SERVO_MOTEUR_PIN, 500, 2400); 
 
   //action d'intitialisation
-  action_window=CLOSE ;
+  action_window=OPEN ;
 
   //serial Begin
   Serial.begin(115200);
 }
 
 void loop() {
-  //initialisation action par des boutons ;;;
-  
-  
+  //initialisation action par des boutons
 
-//  for (pos = 0; pos <= 180; pos += 1) { // goes from 0 degrees to 180 degrees
-//    // in steps of 1 degree
-//    myservo.write(pos);    // tell servo to go to position in variable 'pos'
-//    delay(15);             // waits 15ms for the servo to reach the position
-//  }
-//  for (pos = 180; pos >= 0; pos -= 1) { // goes from 180 degrees to 0 degrees
-//    myservo.write(pos);    // tell servo to go to position in variable 'pos'
-//    delay(15);             // waits 15ms for the servo to reach the position
-//  }
+  // initialistation action par blueetooth
 
+  /******************* delete this block ************/
+  delay(10000);
+  Serial.println("retour position"); 
+  myservo.write(25);
+  delay(10000);
+  /*************************************************/
+  Serial.print("Commencer execution  de la bouce loop !");
 
-  Serial.print("Bonjour mohamed !");
- // test = analogRead(10); 
-   
+  //récupérer la position acteulle du moteur
+  position_actuel = myservo.read();
+
+  // action fermeture fenêtre 
   if(action_window == CLOSE){
-    position_actuel = myservo.read();
-    for (pos = 0; pos <= 90; pos++) {
-      myservo.write(pos);
-      delay(15); // Wait for 15 millisecond(s)
+    for (positionner_servo = position_actuel ; positionner_servo >=DEGREE_WINDOW_POSITION_CLOSE ; positionner_servo--) {
+      // déplacer le moteur vers la nouvelle position
+      myservo.write(positionner_servo);
+      // Wait for DELAY_VALUE millisecond(s)
+      delay(DELAY_VALUE); 
     }
-    Serial.println("action == 2 ==> !");
     action_window = ETAT_CONST;
-  } else if (action_window == OPEN){
-    position_actuel = myservo.read();
-    for (pos = 90; pos >= 0; pos--) {
-      myservo.write(pos);
-      delay(15); // Wait for 15 millisecond(s)
+  } 
+  
+  // action ouverture fenêtre
+  else if (action_window == OPEN){
+    for (positionner_servo = position_actuel; positionner_servo <= DEGREE_WINDOW_POSITION_OPEN ; positionner_servo++) {
+      // déplacer le moteur vers la nouvelle position
+      myservo.write(positionner_servo);
+      // Wait for DELAY_VALUE millisecond(s)
+      delay(DELAY_VALUE); 
     }
-    Serial.println("action == 1 ==>  !");
     action_window = ETAT_CONST;
-  } else {
-    Serial.println("action == 0 ==>  !");
+  } 
+  
+  else {
+    // Faire rien
   }
 }
