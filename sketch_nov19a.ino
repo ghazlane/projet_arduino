@@ -68,8 +68,6 @@ void ouvrir_fenetre();
 void fermer_fenetre(); 
 void traitement_ouverture_fermeture_fenetre();
 
-
-
 void setup() {
   // Allow allocation of all timers
   ESP32PWM::allocateTimer(0);
@@ -89,7 +87,7 @@ void setup() {
   //serial Begin
   Serial.begin(115200);
 
-  //Bluethoot 
+  // Bluethoot message pour établir une connexion
   SerialBT.begin("Fenêtre de la salle Numéro : 1"); 
   Serial.println("the device started, now you can pair it with your phone"); 
 }
@@ -103,21 +101,19 @@ void loop() {
       SerialBT.write(Serial.read());
   }
 
-while (SerialBT.available()){
-  receiveChar = (char)SerialBT.read(); 
-  inData += receiveChar;
-    if(receiveChar == '\n'){
-      SerialBT.print("Received:"); 
-      SerialBT.println(inData);
-      Serial.print("receive"); 
-      action_window = inData.toInt();
-      traitement_ouverture_fermeture_fenetre(); 
-      inData = ""; 
-    }
-  delay(50); 
+  while (SerialBT.available()){
+    receiveChar = (char)SerialBT.read(); 
+    inData += receiveChar;
+      if(receiveChar == '\n'){
+        SerialBT.print("Received message :"); 
+        SerialBT.println(inData);
+        action_window = inData.toInt();
+        traitement_ouverture_fermeture_fenetre(); 
+        inData = ""; 
+      }
+    delay(50); 
+  }
 }
-}
-
 
 
 void traitement_ouverture_fermeture_fenetre(){
