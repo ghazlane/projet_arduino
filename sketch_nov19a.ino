@@ -39,6 +39,13 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+// Bibliothéque et config bluethoot
+#include "BluetoothSerial.h"
+#if !defined(CONFIG_BT_ENABLED) || !defined(CONFIG_BLUEDROID_ENABLED)
+#error Bluetooth is not enabled! Please run `make menu config`
+#endif
+
+
 #define SERVO_MOTEUR_PIN 4
 #define OPEN 1 
 #define CLOSE 2
@@ -51,6 +58,16 @@ Servo myservo;  // create servo object to control a servo
 int positionner_servo;    // variable to store the servo position
 int action_window;    // Action à appliquer sur la feneêtre
 int position_actuel; 
+
+BluetoothSerial SerialBT; 
+String inData; 
+char receiveChar; 
+
+// prototype des fonctions 
+void ouvrir_fenetre(); 
+void fermer_fenetre(); 
+void traitement_ouverture_fermeture_fenetre();
+
 
 
 void setup() {
@@ -67,51 +84,79 @@ void setup() {
   myservo.attach(SERVO_MOTEUR_PIN, 500, 2400); 
 
   //action d'intitialisation
-  action_window=OPEN ;
+  action_window=ETAT_CONST ;
 
   //serial Begin
   Serial.begin(115200);
+
+  //Bluethoot 
+  SerialBT.begin("Fenêtre de la salle Numéro : 1"); 
+  Serial.println("the device started, now you can pair it with your phone"); 
 }
+
 
 void loop() {
   //initialisation action par des boutons
 
   // initialistation action par blueetooth
+  if(Serial.available()){
+      SerialBT.write(Serial.read());
+  }
 
-  /******************* delete this block ************/
-  delay(10000);
-  Serial.println("retour position"); 
-  myservo.write(25);
-  delay(10000);
-  /*************************************************/
-  Serial.print("Commencer execution  de la bouce loop !");
+while (SerialBT.available()){
+  receiveChar = (char)SerialBT.read(); 
+  inData += receiveChar;
+    if(receiveChar == '\n'){
+      SerialBT.print("Received:"); 
+      SerialBT.println(inData);
+      Serial.print("receive"); 
+      action_window = inData.toInt();
+      traitement_ouverture_fermeture_fenetre(); 
+      inData = ""; 
+    }
+  delay(50); 
+}
+}
 
-  //récupérer la position acteulle du moteur
+
+
+void traitement_ouverture_fermeture_fenetre(){
+    //récupérer la position acteulle du moteur
   position_actuel = myservo.read();
+  Serial.println("=====> Action sur le moteur"); 
 
   // action fermeture fenêtre 
   if(action_window == CLOSE){
-    for (positionner_servo = position_actuel ; positionner_servo >=DEGREE_WINDOW_POSITION_CLOSE ; positionner_servo--) {
-      // déplacer le moteur vers la nouvelle position
-      myservo.write(positionner_servo);
-      // Wait for DELAY_VALUE millisecond(s)
-      delay(DELAY_VALUE); 
-    }
-    action_window = ETAT_CONST;
+    fermer_fenetre(); 
   } 
   
   // action ouverture fenêtre
   else if (action_window == OPEN){
-    for (positionner_servo = position_actuel; positionner_servo <= DEGREE_WINDOW_POSITION_OPEN ; positionner_servo++) {
+    ouvrir_fenetre();
+  } 
+  
+  else {
+    // Faire rien
+  }  
+}
+void fermer_fenetre(){
+  for (positionner_servo = position_actuel ; positionner_servo >=DEGREE_WINDOW_POSITION_CLOSE ; positionner_servo--) {
       // déplacer le moteur vers la nouvelle position
       myservo.write(positionner_servo);
       // Wait for DELAY_VALUE millisecond(s)
       delay(DELAY_VALUE); 
     }
+    Serial.println("appel function fermer fenetre");
     action_window = ETAT_CONST;
-  } 
-  
-  else {
-    // Faire rien
-  }
+}
+
+void ouvrir_fenetre(){
+  for (positionner_servo = position_actuel; positionner_servo <= DEGREE_WINDOW_POSITION_OPEN ; positionner_servo++) {
+      // déplacer le moteur vers la nouvelle position
+      myservo.write(positionner_servo);
+      // Wait for DELAY_VALUE millisecond(s)
+      delay(DELAY_VALUE); 
+    }
+     Serial.println("appel function ouvrir fenetre");
+    action_window = ETAT_CONST;  
 }
