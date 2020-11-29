@@ -46,11 +46,10 @@
 
 Servo myservo;  // create servo object to control a servo
 // 16 servo objects can be created on the ESP32
-
 int pos = 0;    // variable to store the servo position
 // Recommended PWM GPIO pins on the ESP32 include 2,4,12-19,21-23,25-27,32-33 
 int i=0;
-int action;
+int action_window;
 int position_actuel;
 
 
@@ -60,12 +59,17 @@ void setup() {
   ESP32PWM::allocateTimer(1);
   ESP32PWM::allocateTimer(2);
   ESP32PWM::allocateTimer(3);
-  myservo.setPeriodHertz(50);    // standard 50 hz servo
-  myservo.attach(SERVO_MOTEUR_PIN, 500, 2400); // attaches the servo on pin 18 to the servo object
-  // using default min/max of 1000us and 2000us
-  // different servos may require different min/max settings
-  // for an accurate 0 to 180 sweep
-  action=CLOSE ; 
+  
+  // standard 50 hz servo
+  myservo.setPeriodHertz(50); 
+     
+  // attaches the servo on pin 18 to the servo object
+  myservo.attach(SERVO_MOTEUR_PIN, 500, 2400); 
+
+  //action d'intitialisation
+  action_window=CLOSE ;
+
+  //serial Begin
   Serial.begin(115200);
 }
 
@@ -88,26 +92,23 @@ void loop() {
   Serial.print("Bonjour mohamed !");
  // test = analogRead(10); 
    
-  if(action == CLOSE){
+  if(action_window == CLOSE){
     position_actuel = myservo.read();
     for (pos = 0; pos <= 90; pos++) {
       myservo.write(pos);
       delay(15); // Wait for 15 millisecond(s)
     }
     Serial.println("action == 2 ==> !");
-    action = ETAT_CONST;
-  } else if (action == OPEN){
+    action_window = ETAT_CONST;
+  } else if (action_window == OPEN){
     position_actuel = myservo.read();
     for (pos = 90; pos >= 0; pos--) {
       myservo.write(pos);
       delay(15); // Wait for 15 millisecond(s)
     }
     Serial.println("action == 1 ==>  !");
-    action = ETAT_CONST;
-  } else if (action == ETAT_CONST){
-    printf("attendre");
-    //servo_9.write(0);
+    action_window = ETAT_CONST;
+  } else {
     Serial.println("action == 0 ==>  !");
-    action = ETAT_CONST;
   }
 }
