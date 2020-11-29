@@ -45,7 +45,7 @@ int pos = 0;    // variable to store the servo position
 // Recommended PWM GPIO pins on the ESP32 include 2,4,12-19,21-23,25-27,32-33 
 int servoPin = 4;
 int i=0;
-int action =1;
+int action =2;
 int position_actuel;
 
 
@@ -60,10 +60,14 @@ void setup() {
   // using default min/max of 1000us and 2000us
   // different servos may require different min/max settings
   // for an accurate 0 to 180 sweep
+  action=2 ; 
   Serial.begin(115200);
 }
 
 void loop() {
+  //initialisation action par des boutons ;;;
+  
+  
 
 //  for (pos = 0; pos <= 180; pos += 1) { // goes from 0 degrees to 180 degrees
 //    // in steps of 1 degree
@@ -85,6 +89,7 @@ void loop() {
       myservo.write(pos);
       delay(15); // Wait for 15 millisecond(s)
     }
+    Serial.println("action == 2 ==> !");
     action = 0;
   } else if (action == 1){
     position_actuel = myservo.read();
@@ -92,13 +97,12 @@ void loop() {
       myservo.write(pos);
       delay(15); // Wait for 15 millisecond(s)
     }
+    Serial.println("action == 1 ==>  !");
     action = 0;
   } else if (action == 0){
     printf("attendre");
     //servo_9.write(0);
+    Serial.println("action == 0 ==>  !");
     action = 0;
   }
-  exit(0); 
-  return ; 
-  
 }
