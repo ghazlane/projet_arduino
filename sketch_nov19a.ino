@@ -59,6 +59,11 @@ int positionner_servo;    // variable to store the servo position
 int action_window;    // Action à appliquer sur la feneêtre
 int position_actuel; 
 
+//temperature 
+float temperature; 
+const int SENSOR_TEMPERATURE = A5; 
+
+// Connexion Bluthoot
 BluetoothSerial SerialBT; 
 String inData; 
 char receiveChar; 
@@ -67,6 +72,8 @@ char receiveChar;
 void ouvrir_fenetre(); 
 void fermer_fenetre(); 
 void traitement_ouverture_fermeture_fenetre();
+void calculer_temerature(); 
+
 
 void setup() {
   // Allow allocation of all timers
@@ -113,9 +120,19 @@ void loop() {
       }
     delay(50); 
   }
+calculer_temerature();  
 }
 
 
+void calculer_temerature(){
+ temperature = analogRead(SENSOR_TEMPERATURE);
+ temperature=(temperature*500)/1023;
+ Serial.print("Temperature : "); 
+ Serial.print(temperature); 
+ Serial.println("°C"); 
+ delay(1000); 
+} 
+ 
 void traitement_ouverture_fermeture_fenetre(){
     //récupérer la position acteulle du moteur
   position_actuel = myservo.read();
